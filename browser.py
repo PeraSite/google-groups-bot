@@ -22,14 +22,16 @@ async def start_browser() -> uc.Browser:
     user_data_dir.mkdir(exist_ok=True)
     
     browser_path = shutil.which("chromium")
-    
+
     # Start the browser with persistent profile and download settings
-    browser = await uc.start(user_data_dir=str(user_data_dir), browser_args=[
-        "--no-sandbox",
-        "--disable-gpu",       
-        "--disable-dev-shm-usage",
-        "--headless"
-    ])
+    browser = await uc.start(user_data_dir=str(user_data_dir),
+        browser_executable_path=browser_path, # 찾은 경로를 직접 넣어줍니다.
+        browser_args=[
+            "--no-sandbox",
+            "--disable-gpu",       
+            "--disable-dev-shm-usage"
+        ]
+    )
     return browser
 
 
