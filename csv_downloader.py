@@ -64,11 +64,12 @@ async def download_csv(tab: uc.Tab) -> Path:
     await export_button.click()
     logging.debug(f"✅ '목록 내보내기' 버튼 클릭 완료")
     
+    
     # Wait for download to complete (check for new files)
-    logging.debug(f"⏳ 다운로드 대기 시작 (최대 {max_wait * 0.1}초)")
-    logging.info("다운로드 대기 중...")
     max_wait = 50
     waited = 0
+    logging.debug(f"⏳ 다운로드 대기 시작 (최대 {max_wait * 0.1}초)")
+    logging.info("다운로드 대기 중...")
     
     while waited < max_wait:
         await asyncio.sleep(0.1)
