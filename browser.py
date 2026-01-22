@@ -21,7 +21,7 @@ async def start_browser() -> uc.Browser:
     user_data_dir.mkdir(exist_ok=True)
     
     # Start the browser with persistent profile and download settings
-    browser = await uc.start(user_data_dir=str(user_data_dir))
+    browser = await uc.start(user_data_dir=str(user_data_dir), headless=True)
     return browser
 
 
