@@ -27,6 +27,25 @@ async def download_csv(tab: uc.Tab) -> Path:
     clear_download_directory()
     logging.debug(f"✅ 다운로드 디렉토리 초기화 완료")
 
+    # Debug: Check all .uArJ5e elements and their aria-label attributes
+    logging.debug(f"🔍 .uArJ5e 엘리먼트들의 aria-label 확인 중...")
+    try:
+        aria_labels = await tab.evaluate("""
+            (() => {
+                try {
+                    const elements = document.querySelectorAll('.uArJ5e');
+                    return Array.from(elements).map(el => el.getAttribute('aria-label'));
+                } catch (e) {
+                    return [];
+                }
+            })()
+        """)
+        logging.debug(f"📋 발견된 aria-label 목록: {aria_labels}")
+    except Exception as e:
+        logging.debug(f"⚠️ aria-label 확인 중 오류 발생: {e}")
+        aria_labels = []
+        logging.debug(f"📋 발견된 aria-label 목록: {aria_labels}")
+    
     # Find element with aria-label "목록 내보내기"
     logging.debug(f"🔍 '목록 내보내기' 버튼 찾는 중...")
     export_button = await tab.select('div[jsname="JV2Tqf"]')
