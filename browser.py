@@ -39,16 +39,16 @@ async def start_browser():
             shutil.copy2(inject_source / "Cookies", default_dir / "Cookies")
             print("   - Cookies injected ✅")
 
-        # [수정 3] Local Storage 복사 시 'LOCK' 파일은 제외 (충돌 방지)
-        if (inject_source / "Local Storage").exists():
-            shutil.copytree(
-                inject_source / "Local Storage", 
-                default_dir / "Local Storage", 
-                dirs_exist_ok=True,
-                # 중요: LOCK 파일과 임시 파일을 무시합니다.
-                ignore=shutil.ignore_patterns("LOCK", "*.lock", "*.tmp")
-            )
-            print("   - Local Storage injected (Safely) ✅")
+        # # [수정 3] Local Storage 복사 시 'LOCK' 파일은 제외 (충돌 방지)
+        # if (inject_source / "Local Storage").exists():
+        #     shutil.copytree(
+        #         inject_source / "Local Storage", 
+        #         default_dir / "Local Storage", 
+        #         dirs_exist_ok=True,
+        #         # 중요: LOCK 파일과 임시 파일을 무시합니다.
+        #         ignore=shutil.ignore_patterns("LOCK", "*.lock", "*.tmp")
+        #     )
+        #     print("   - Local Storage injected (Safely) ✅")
             
     except Exception as e:
         print(f"⚠️ Injection Warning: {e}")
@@ -62,6 +62,7 @@ async def start_browser():
             "--disable-dev-shm-usage",
             "--headless=new",
             "--window-size=1920,1080"   # 화면 크기가 너무 작아도 렌더링 터질 수 있음
+            "--lang=ko_KR",             # 한국어 설정 (구글 페이지 언어 고정)
         ]
     )
     return browser
