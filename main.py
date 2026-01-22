@@ -20,6 +20,30 @@ global_tab: uc.Tab | None = None
 
 # Single flight pattern: 같은 group_id에 대한 동시 요청을 하나로 통합
 _get_members_flights: dict[str, asyncio.Task[list[str]]] = {}
+_get_members_flights_lock = asyncio.Lock()
+
+
+async def _run_get_members(group_id: str) -> list[str]:
+    if global_tab is None:
+        raise HTTPException(status_code=503, detail="Tab not initialized")
+    groups = GoogleGroups(global_tab, group_id)
+    await groups.prepare_members()
+    return await groups.get_members()
+
+
+async def _get_members_singleflight(group_id: str) -> list[str]:
+    async with _get_members_flights_lock:
+        existing_task = _get_members_flights.get(group_id)
+        if existing_task is None:
+            existing_task = asyncio.create_task(_run_get_members(group_id))
+            _get_members_flights[group_id] = existing_task
+
+    try:
+        return await existing_task
+    finally:
+        async with _get_members_flights_lock:
+            if _get_members_flights.get(group_id) is existing_task:
+                _get_members_flights.pop(group_id, None)
 
 
 async def initialize_monitor(group_id: str) -> GoogleGroupsMemberMonitor:
@@ -62,12 +86,7 @@ async def get_last_successful() -> LastSuccessfulResult:
 
 @app.get("/groups/{group_id}/members")
 async def get_members(group_id: str) -> list[str]:
-    if global_tab is None:
-        raise HTTPException(status_code=503, detail="Tab not initialized")
-    groups = GoogleGroups(global_tab, group_id)
-    await groups.prepare_members()
-    members = await groups.get_members()
-    return members
+    return await _get_members_singleflight(group_id)
 
 
 @app.post("/groups/{group_id}/prepare", status_code=204)
