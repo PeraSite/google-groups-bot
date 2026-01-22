@@ -60,7 +60,8 @@ async def start_browser():
             "--no-sandbox",
             "--disable-gpu",
             "--disable-dev-shm-usage",
-            "--headless=new"
+            "--headless=new",
+            "--window-size=1920,1080"   # 화면 크기가 너무 작아도 렌더링 터질 수 있음
         ]
     )
     return browser
