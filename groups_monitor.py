@@ -46,8 +46,10 @@ class GoogleGroupsMemberMonitor:
                 #logging.info(f"prepare_members completed in {prepare_elapsed:.2f} seconds")
                 
                 get_members_start = time.time()
+                logging.debug(f"[GoogleGroupsMemberMonitor] Calling groups.get_members() for group_id={self.group_id}")
                 emails = await groups.get_members()
                 get_members_elapsed = time.time() - get_members_start
+                logging.debug(f"[GoogleGroupsMemberMonitor] groups.get_members() completed for group_id={self.group_id}, elapsed={get_members_elapsed:.2f}s, count={len(emails)}")
                 #logging.info(f"get_members completed in {get_members_elapsed:.2f} seconds")
                 
                 total_elapsed = time.time() - total_start

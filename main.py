@@ -10,7 +10,7 @@ from groups_monitor import GoogleGroupsMemberMonitor, LastSuccessfulResult
 import nodriver as uc
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
@@ -28,7 +28,10 @@ async def _run_get_members(group_id: str) -> list[str]:
         raise HTTPException(status_code=503, detail="Tab not initialized")
     groups = GoogleGroups(global_tab, group_id)
     await groups.prepare_members()
-    return await groups.get_members()
+    logging.debug(f"[_run_get_members] Calling groups.get_members() for group_id={group_id}")
+    result = await groups.get_members()
+    logging.debug(f"[_run_get_members] groups.get_members() completed for group_id={group_id}, count={len(result)}")
+    return result
 
 
 async def _get_members_singleflight(group_id: str) -> list[str]:
