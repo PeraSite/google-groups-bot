@@ -10,7 +10,7 @@ cmds = ["echo 'Skipping slow apt-get update...'"]
 # --- 기본 유틸리티 (apt 대체) ---
 curl = "latest"
 wget = "latest"
-ca-certificates = "latest"
+cacert = "latest"  # <--- [수정됨] ca-certificates가 아니라 cacert 입니다!
 openssl = "latest"
 
 # --- Python 환경 ---

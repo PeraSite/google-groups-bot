@@ -72,7 +72,9 @@ async def start_browser():
             "--disable-extensions",
             "--disable-background-networking",
             "--disable-default-apps",
-            "--mute-audio"
+            "--mute-audio"# 👇 [추가] 크래시 방지용 옵션들
+            "--disable-software-rasterizer", # SW 렌더링 끄기
+        
         ]
     )
     return browser
