@@ -32,14 +32,6 @@ nss = "latest"
 nspr = "latest"
 at-spi2-core = "latest"
 
-# 4. Install 단계 (UV 사용)
-# uv sync를 사용하여 lock 파일 기반으로 정확하고 빠르게 설치합니다.
-[phases.install]
-cmds = [
-    "uv venv",
-    "uv sync --frozen"
-]
-
 # 5. Build 단계 (필요시)
 [phases.build]
 cmds = ["echo 'Building...'"]
