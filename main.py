@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
@@ -13,21 +14,23 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-ENABLE_MONITOR = False
+ENABLE_MONITOR = True
 groups_member_monitor: GoogleGroupsMemberMonitor | None = None
+global_tab: uc.Tab | None = None
 
 
 async def initialize_monitor(group_id: str) -> GoogleGroupsMemberMonitor:
-    browser = await start_browser()
-    tab = await create_tab(browser)
-    monitor = GoogleGroupsMemberMonitor(tab, group_id)
+    await asyncio.sleep(5)
+    monitor = GoogleGroupsMemberMonitor(global_tab, group_id)
     _ = asyncio.create_task(monitor.run())
     return monitor
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    global groups_member_monitor
+    global groups_member_monitor, global_tab
+    browser = await start_browser()
+    global_tab = await create_tab(browser)
     if ENABLE_MONITOR:
         groups_member_monitor = await initialize_monitor("didtest2")
     yield
@@ -46,12 +49,20 @@ async def get_last_successful() -> LastSuccessfulResult:
 
 @app.get("/groups/{group_id}/members")
 async def get_members(group_id: str) -> list[str]:
-    browser = await start_browser()
-    tab = await create_tab(browser)
-    groups = GoogleGroups(tab, group_id)
+    if global_tab is None:
+        raise HTTPException(status_code=503, detail="Tab not initialized")
+    groups = GoogleGroups(global_tab, group_id)
+    await groups.prepare_members()
     members = await groups.get_members()
-    await tab.close()
     return members
+
+
+@app.post("/groups/{group_id}/prepare", status_code=204)
+async def prepare_members(group_id: str) -> None:
+    if global_tab is None:
+        raise HTTPException(status_code=503, detail="Tab not initialized")
+    groups = GoogleGroups(global_tab, group_id)
+    await groups.prepare_members()
 
 
 class AddMembersRequest(BaseModel):
@@ -60,9 +71,11 @@ class AddMembersRequest(BaseModel):
 
 @app.post("/groups/{group_id}/members", status_code=204)
 async def add_members(group_id: str, request: AddMembersRequest) -> None:
-    browser = await start_browser()
-    tab = await create_tab(browser)
-    groups = GoogleGroups(tab, group_id)
+    if global_tab is None:
+        raise HTTPException(status_code=503, detail="Tab not initialized")
+    start_time = time.time()
+    groups = GoogleGroups(global_tab, group_id)
     await groups.add_members(request.email)
-    await tab.close()
+    elapsed_time = time.time() - start_time
+    logging.info(f"add_members completed in {elapsed_time:.2f} seconds for group_id={group_id}, email={request.email}")
     

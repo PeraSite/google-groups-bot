@@ -7,13 +7,14 @@ from browser import clear_download_directory, create_tab, get_download_dir, star
 from csv_reader import extract_emails
 
 
-async def download_csv(tab: uc.Tab, group_id: str) -> Path:
+async def navigate_to_groups_member(tab: uc.Tab, group_id: str) -> None:
     url = f"https://groups.google.com/g/{group_id}/members?hl=ko"
     logging.info(f"페이지 열기 중: {url}")
     _ = await tab.get(url)
     logging.info(f"페이지 열기 완료: {url}")
-    await asyncio.sleep(5)
 
+
+async def download_csv(tab: uc.Tab) -> Path:
     clear_download_directory()
 
     # Find element with aria-label "목록 내보내기"
@@ -29,11 +30,11 @@ async def download_csv(tab: uc.Tab, group_id: str) -> Path:
     
     # Wait for download to complete (check for new files)
     logging.info("다운로드 대기 중...")
-    max_wait = 5
+    max_wait = 50
     waited = 0
     
     while waited < max_wait:
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
         waited += 1
         
         # Check for new files

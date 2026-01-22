@@ -1,13 +1,13 @@
 import asyncio
 import nodriver as uc
 
-from browser import create_tab, start_browser
 
-async def add_groups_member(tab: uc.Tab, group_id: str, email: str) -> None:
+async def navigate_to_groups_member(tab: uc.Tab, group_id: str) -> None:
     url = f"https://groups.google.com/g/{group_id}/members?hl=ko"
     _ = await tab.get(url)
-    await asyncio.sleep(5)
 
+
+async def add_groups_member(tab: uc.Tab, email: str) -> None:
     add_button = await tab.select('div[aria-label="회원 추가"]')
     if not add_button:
         raise Exception("회원 추가 버튼을 찾을 수 없습니다.")
@@ -25,7 +25,6 @@ async def add_groups_member(tab: uc.Tab, group_id: str, email: str) -> None:
         raise Exception("그룹 멤버 입력칸을 찾을 수 없습니다.")
 
     await group_member_field.send_keys(email)
-    await asyncio.sleep(3)
 
     member_ul = await tab.select('ul')
     if not member_ul:
@@ -35,33 +34,32 @@ async def add_groups_member(tab: uc.Tab, group_id: str, email: str) -> None:
     if not member_li:
         raise Exception("회원 목록을 찾을 수 없습니다.")
     await member_li.click()
-    await asyncio.sleep(1)
 
     add_button = await tab.select_all('div[aria-label="회원 추가"]')
     if len(add_button) == 0:
         raise Exception("회원 추가 버튼을 찾을 수 없습니다.")
     await add_button[1].click()
 
+    max_retries = 10
+    for attempt in range(max_retries):
+        try:
+            captcha_token = await tab.select('#recaptcha-token', timeout=0)
+            print(captcha_token.attrs['value'])
+            await asyncio.sleep(3)
+        except Exception as e:
+            print(e)
+            if attempt == max_retries - 1:
+                raise Exception(f"Captcha 처리 실패: {max_retries}번 시도 후에도 실패했습니다. {str(e)}")
+            await asyncio.sleep(1)
+
+    while True:
+        add_buttons = await tab.select_all('div[aria-label="회원 추가"]')
+        if len(add_buttons) == 0:
+            raise Exception("회원 추가 버튼을 찾을 수 없습니다.")
+        add_button = add_buttons[-1]
+        if not "aria-disabled" in add_button.attrs:
+            await add_button.click()
+            break
+        await asyncio.sleep(1)
+    
     await asyncio.sleep(3)
-
-    captcha_button = await tab.select_all('iframe[title="reCAPTCHA"]')
-    if len(captcha_button) == 0:
-        raise Exception("Captcha 확인 버튼을 찾을 수 없습니다.")
-    print(captcha_button)
-    await captcha_button[0].mouse_click()
-    await asyncio.sleep(10)
-
-    add_button = await tab.select_all('div[aria-label="회원 추가"]')
-    if len(add_button) == 0:
-        raise Exception("회원 추가 버튼을 찾을 수 없습니다.")
-    print(add_button)
-    await add_button[-1].click()
-    await asyncio.sleep(3)
-
-async def main():
-    browser = await start_browser()
-    tab = await create_tab(browser)
-    await add_groups_member(tab, "didtest2", "test@example.com")
-
-if __name__ == "__main__":
-    asyncio.run(main())
