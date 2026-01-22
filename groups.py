@@ -1,6 +1,7 @@
 import logging
 import nodriver as uc
 
+import add_groups_member
 from csv_downloader import download_csv
 from csv_reader import extract_emails
 
@@ -15,3 +16,6 @@ class GoogleGroups:
         emails = extract_emails(csv_path)
         logging.info(f"추출된 이메일: {emails}")
         return emails
+
+    async def add_members(self, email: str) -> None:
+        await add_groups_member.add_groups_member(self.tab, self.group_id, email)

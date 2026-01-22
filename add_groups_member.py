@@ -56,7 +56,7 @@ async def add_groups_member(tab: uc.Tab, group_id: str, email: str) -> None:
         raise Exception("회원 추가 버튼을 찾을 수 없습니다.")
     print(add_button)
     await add_button[-1].click()
-    await asyncio.sleep(3000)
+    await asyncio.sleep(3)
 
 async def main():
     browser = await start_browser()

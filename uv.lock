@@ -216,7 +216,7 @@ wheels = [
 ]
 
 [[package]]
-name = "google-groups-manager"
+name = "google-groups-bot"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

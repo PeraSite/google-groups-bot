@@ -2,6 +2,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, EmailStr
 from browser import create_tab, start_browser
 from groups import GoogleGroups
 from groups_monitor import GoogleGroupsMemberMonitor, LastSuccessfulResult
@@ -13,12 +14,11 @@ logging.basicConfig(
 )
 
 ENABLE_MONITOR = False
-
-browser: uc.Browser | None = None
 groups_member_monitor: GoogleGroupsMemberMonitor | None = None
 
 
-async def initialize_monitor(browser: uc.Browser, group_id: str) -> GoogleGroupsMemberMonitor:
+async def initialize_monitor(group_id: str) -> GoogleGroupsMemberMonitor:
+    browser = await start_browser()
     tab = await create_tab(browser)
     monitor = GoogleGroupsMemberMonitor(tab, group_id)
     _ = asyncio.create_task(monitor.run())
@@ -27,10 +27,9 @@ async def initialize_monitor(browser: uc.Browser, group_id: str) -> GoogleGroups
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    global browser, groups_member_monitor
-    browser = await start_browser()
+    global groups_member_monitor
     if ENABLE_MONITOR:
-        groups_member_monitor = await initialize_monitor(browser, "didtest2")
+        groups_member_monitor = await initialize_monitor("didtest2")
     yield
 
 
@@ -47,9 +46,23 @@ async def get_last_successful() -> LastSuccessfulResult:
 
 @app.get("/groups/{group_id}/members")
 async def get_members(group_id: str) -> list[str]:
-    if browser is None:
-        raise HTTPException(status_code=503, detail="Browser not initialized")
-
+    browser = await start_browser()
     tab = await create_tab(browser)
     groups = GoogleGroups(tab, group_id)
-    return await groups.get_members()
+    members = await groups.get_members()
+    await tab.close()
+    return members
+
+
+class AddMembersRequest(BaseModel):
+    email: EmailStr
+
+
+@app.post("/groups/{group_id}/members", status_code=204)
+async def add_members(group_id: str, request: AddMembersRequest) -> None:
+    browser = await start_browser()
+    tab = await create_tab(browser)
+    groups = GoogleGroups(tab, group_id)
+    await groups.add_members(request.email)
+    await tab.close()
+    
