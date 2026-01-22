@@ -21,9 +21,14 @@ gcc = "latest" # C 확장이 있는 라이브러리(mss, uvicorn 등) 빌드용
 
 # --- Browser (Nodriver용) ---
 chromium = "latest"
+# --- ✨ [핵심] 폰트 및 렌더링 라이브러리 추가 ✨ ---
+# 이게 없으면 headless 모드에서 요소 찾을 때 죽습니다.
+fontconfig = "latest"
+noto-fonts = "latest"
+noto-fonts-cjk = "latest" # 한글 폰트 (필수)
+noto-fonts-emoji = "latest"
 
-# --- GUI 및 Screen Capture 라이브러리 (MSS, Chrome 의존성) ---
-# mss와 chromium이 리눅스 환경에서 실행되기 위해 필요한 라이브러리들입니다.
+# --- GUI 라이브러리 (기존 유지) ---
 xorg.libX11 = "latest"
 xorg.libxcb = "latest"
 libxkbcommon = "latest"
@@ -31,6 +36,8 @@ glib = "latest"
 nss = "latest"
 nspr = "latest"
 at-spi2-core = "latest"
+alsa-lib = "latest"       # 소리 관련이지만 크롬 안정성에 도움됨
+cups = "latest"           # 프린팅 관련이지만 크롬 의존성 중 하나
 
 # 5. Build 단계 (필요시)
 [phases.build]

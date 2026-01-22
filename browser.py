@@ -53,9 +53,13 @@ async def start_browser():
     except Exception as e:
         print(f"⚠️ Injection Warning: {e}")
 
+
+    browser_executable = shutil.which("chromium")
+
     # 2. 브라우저 시작
     browser = await uc.start(
         user_data_dir=str(work_dir),
+        browser_executable=browser_executable,
         browser_args=[
             "--no-sandbox",
             "--disable-gpu",
@@ -63,6 +67,12 @@ async def start_browser():
             "--headless=new",
             "--window-size=1920,1080"   # 화면 크기가 너무 작아도 렌더링 터질 수 있음
             "--lang=ko_KR",             # 한국어 설정 (구글 페이지 언어 고정)
+            # [추가] 렌더링 관련 크래시 방지 옵션들
+            "--disable-software-rasterizer", # SW 렌더러 비활성화
+            "--disable-extensions",
+            "--disable-background-networking",
+            "--disable-default-apps",
+            "--mute-audio"
         ]
     )
     return browser
