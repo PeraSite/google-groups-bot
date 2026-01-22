@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import nodriver as uc
 from pathlib import Path
 
@@ -8,9 +9,9 @@ from csv_reader import extract_emails
 
 async def download_csv(tab: uc.Tab, group_id: str) -> Path:
     url = f"https://groups.google.com/g/{group_id}/members?hl=ko"
-    print(f"페이지 열기 중: {url}")
+    logging.info(f"페이지 열기 중: {url}")
     _ = await tab.get(url)
-    print(f"페이지 열기 완료: {url}")
+    logging.info(f"페이지 열기 완료: {url}")
     await asyncio.sleep(5)
 
     clear_download_directory()
@@ -27,7 +28,7 @@ async def download_csv(tab: uc.Tab, group_id: str) -> Path:
     await export_button.click()
     
     # Wait for download to complete (check for new files)
-    print("다운로드 대기 중...")
+    logging.info("다운로드 대기 중...")
     max_wait = 5
     waited = 0
     
@@ -45,9 +46,9 @@ async def download_csv(tab: uc.Tab, group_id: str) -> Path:
         if new_files and not downloading_files:
             # Download completed
             for file_path in new_files:
-                print(f"다운로드 완료: {file_path.absolute()}")
+                logging.info(f"다운로드 완료: {file_path.absolute()}")
                 return file_path
         elif downloading_files:
-            print(f"다운로드 진행 중... ({waited}초)")
+            logging.info(f"다운로드 진행 중... ({waited}초)")
     
     raise Exception("다운로드 타임아웃: 파일이 완전히 다운로드되지 않았을 수 있습니다.")

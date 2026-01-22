@@ -1,4 +1,5 @@
 import csv
+import logging
 from pathlib import Path
 
 
@@ -21,6 +22,10 @@ def extract_emails(csv_path: str | Path) -> list[str]:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
     csv_file = Path(__file__).parent / "downloads" / "didtest2.csv"
     emails = extract_emails(csv_file)
-    print(emails)
+    logging.info(f"추출된 이메일: {emails}")
