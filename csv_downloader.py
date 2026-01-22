@@ -29,7 +29,7 @@ async def download_csv(tab: uc.Tab) -> Path:
 
     # Find element with aria-label "목록 내보내기"
     logging.debug(f"🔍 '목록 내보내기' 버튼 찾는 중...")
-    export_button = await tab.select('div[aria-label="목록 내보내기"]')
+    export_button = await tab.select('div[jsname="JV2Tqf"]')
     if not export_button:
         logging.error(f"❌ '목록 내보내기' 버튼을 찾을 수 없습니다!")
         raise Exception("목록 내보내기 버튼을 찾을 수 없습니다.")
