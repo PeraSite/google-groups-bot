@@ -1,5 +1,6 @@
 from pathlib import Path
 import nodriver as uc
+import shutil
 
 # Create download directory
 download_dir = Path("./downloads")
@@ -20,8 +21,15 @@ async def start_browser() -> uc.Browser:
     user_data_dir = Path("./browser_profile")
     user_data_dir.mkdir(exist_ok=True)
     
+    browser_path = shutil.which("chromium")
+    
     # Start the browser with persistent profile and download settings
-    browser = await uc.start(user_data_dir=str(user_data_dir), headless=True)
+    browser = await uc.start(user_data_dir=str(user_data_dir), browser_args=[
+        "--no-sandbox",
+        "--disable-gpu",       
+        "--disable-dev-shm-usage",
+        "--headless"
+    ])
     return browser
 
 
