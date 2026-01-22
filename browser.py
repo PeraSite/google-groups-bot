@@ -31,7 +31,8 @@ async def start_browser() -> uc.Browser:
         browser_args=[
             "--no-sandbox",
             "--disable-gpu",       
-            "--disable-dev-shm-usage"
+            "--disable-dev-shm-usage",
+            "--headless"
         ]
     )
     return browser
