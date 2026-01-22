@@ -29,7 +29,9 @@ async def start_browser() -> uc.Browser:
     browser = await uc.start(user_data_dir=str(user_data_dir),
         browser_executable_path=browser_path, # 찾은 경로를 직접 넣어줍니다.
         browser_args=[
-            "--headless"
+            "--headless",
+            "--no-sandbox",
+            "--disable-dev-shm-usage"
         ]
     )
     return browser

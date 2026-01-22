@@ -12,3 +12,4 @@ wheels/
 # Browser data
 browser_profile/
 downloads/
+.DS_Store
