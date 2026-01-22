@@ -1,4 +1,49 @@
+# 1. Python 프로바이더 사용
 providers = ["python"]
 
+# 2. apt-get update 무한 로딩 방지 (필수 단계 덮어쓰기)
+[phases.setup]
+cmds = ["echo 'Skipping slow apt-get update...'"]
+
+# 3. 시스템 패키지 설치 (Nix 패키지 매니저 이용)
 [packages]
+# --- 기본 유틸리티 (apt 대체) ---
+curl = "latest"
+wget = "latest"
+ca-certificates = "latest"
+openssl = "latest"
+
+# --- Python 환경 ---
+# uv.lock에 >=3.13이 명시되어 있으므로 3.13 버전을 요청합니다.
+python313 = "latest"
+uv = "latest"
+gcc = "latest" # C 확장이 있는 라이브러리(mss, uvicorn 등) 빌드용
+
+# --- Browser (Nodriver용) ---
 chromium = "latest"
+
+# --- GUI 및 Screen Capture 라이브러리 (MSS, Chrome 의존성) ---
+# mss와 chromium이 리눅스 환경에서 실행되기 위해 필요한 라이브러리들입니다.
+xorg.libX11 = "latest"
+xorg.libxcb = "latest"
+libxkbcommon = "latest"
+glib = "latest"
+nss = "latest"
+nspr = "latest"
+at-spi2-core = "latest"
+
+# 4. Install 단계 (UV 사용)
+# uv sync를 사용하여 lock 파일 기반으로 정확하고 빠르게 설치합니다.
+[phases.install]
+cmds = [
+    "uv venv",
+    "uv sync --frozen"
+]
+
+# 5. Build 단계 (필요시)
+[phases.build]
+cmds = ["echo 'Building...'"]
+
+# 6. 실행 명령어 (Coolify UI 설정을 우선하지만, 파일에도 명시하면 좋습니다)
+[start]
+cmd = "uv run fastapi run main.py"
